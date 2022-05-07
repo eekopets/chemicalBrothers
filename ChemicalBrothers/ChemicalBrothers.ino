@@ -17,7 +17,7 @@ int PinMotors2[] = {48, 42, 47, 43, 40, 5, 41, 37};
 int PinsPhotoInt[] = {22, 24, 23, 25, 9, 11, 12, 13};
 int interState[] = {0, 0, 0, 0, 0, 0, 0, 0};
 int current[] = {0, 0, 0, 0, 0, 0, 0, 0};
-unsigned long CalibrationTime = 60000;
+int CalibrationTime = 10000;
 ads12xx ADS;  //initialize ADS as object of the ads12xx class
 
 
@@ -96,7 +96,7 @@ void loop() {
 
         for (int i = 0; i < Cells; i++)
         {
-          analogWrite(PinMotors[i], 18);
+          analogWrite(PinMotors[i], 36);
         }
 
         break;
@@ -114,6 +114,15 @@ void loop() {
         Serial.println("'n'— stop motors");
         Serial.println("'c'— calibration speed");
         Serial.println("'C'— stop calibration");
+         for (int i = 0; i < Cells; i++)
+        {
+          Serial.print("Speed motor:");
+          Serial.print(i+1);
+          Serial.print("\t");
+          Serial.println(interState[i]/2);
+        }
+
+        
         break;
       case 'c':
         Serial.println("Calibration speed");
@@ -121,10 +130,11 @@ void loop() {
         {
           current[i] = digitalRead(PinsPhotoInt[i]);
         }
-        while (Serial.read() != 'C' || millis()< CalibrationTime) {
+        int startT = millis();
+        while((Serial.read() != 'C')&&(millis()-startT<CalibrationTime)) {
           for (int i = 0; i < Cells; i++)
           {
-            if (digitalRead(PinsPhotoInt[i]) == !current)
+            if (digitalRead(PinsPhotoInt[i]) == !current[i])
             {
               interState[i] = interState[i] + 1;
               current[i] = digitalRead(PinsPhotoInt[i]);
@@ -132,12 +142,12 @@ void loop() {
           }
         }
         Serial.println("stop calibration");
-        Serial.println (interState[8]);
+        //Serial.println (interState[8]);
         break;
       //-------------------------------------------------------------------------------------------------
       default:
 
-        digitalWrite(4, LOW); //turn off the led when we dont measure (needs to press N two times)
+        //digitalWrite(4, LOW); //turn off the led when we dont measure (needs to press N two times)
         break;
         //-------------------------------------------------------------------------------------------------
     }
