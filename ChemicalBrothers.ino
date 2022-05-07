@@ -7,15 +7,16 @@ File myFile;
 const int  START = 8;
 const int  CS = 10;
 const int  DRDY = 2;
-const int RESET_  = 9;
+const int RESET_ = 9;
 
 const int SDpin = 53;//slave select SD-card
-
 int Cells = 8;
 char Bin[] = {B00001000, B00011000, B00101000,  B00111000, B01001000, B01011000, B01101000, B01111000};
 int PinMotors[] = {46, 44, 8, 45 , 3, 4 , 6, 7};
 int PinMotors2[] = {48, 42, 47, 43, 40, 5, 41, 37};
-int PinsPhotoInt[]= {};
+int PinsPhotoInt[] = {22, 24, 23, 25, 9, 11, 12, 13};
+int interState[] = {0, 0, 0, 0, 0, 0, 0, 0};
+int current[] = {0, 0, 0, 0, 0, 0, 0, 0};
 ads12xx ADS;  //initialize ADS as object of the ads12xx class
 
 
@@ -94,7 +95,7 @@ void loop() {
 
         for (int i = 0; i < Cells; i++)
         {
-          analogWrite(PinMotors[i], 150);
+          analogWrite(PinMotors[i], 18);
         }
 
         break;
@@ -104,6 +105,7 @@ void loop() {
         {
           analogWrite(PinMotors[i], 0);
         }
+        break;
       case 'i':
         Serial.println("'w'— starts writing to file");
         Serial.println("'s'— stops writing to file");
@@ -113,11 +115,23 @@ void loop() {
         Serial.println("'C'— stop calibration");
         break;
       case 'c':
+        Serial.println("Calibration speed");
         for (int i = 0; i < Cells; i++)
         {
-          analogWrite(PinMotors[i], 150);
+          current[i] = digitalRead(PinsPhotoInt[i]);
         }
-
+        while (Serial.read() != 'C') {
+          for (int i = 0; i < Cells; i++)
+          {
+            if (digitalRead(PinsPhotoInt[i]) == !current)
+            {
+              interState[i] = interState[i] + 1;
+              current[i] = digitalRead(PinsPhotoInt[7]);
+            }
+          }
+        }
+        Serial.println("stop calibration");
+        Serial.println (interState[8]);
         break;
       //-------------------------------------------------------------------------------------------------
       default:
