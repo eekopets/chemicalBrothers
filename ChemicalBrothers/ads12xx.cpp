@@ -32,7 +32,9 @@ void ads12xx::begin(int CS, int START, int DRDY) {
 	pinMode(START, OUTPUT);
 	digitalWrite(START, LOW);        // HIGH = Start Convert Continuously
 	delay(500);
-	digitalWrite(START, HIGH);
+	//digitalWrite(START, HIGH);
+ 
+ 
 	_CS = CS;
 	_DRDY = DRDY;
 	delay(500);
