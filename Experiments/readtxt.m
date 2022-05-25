@@ -4,7 +4,8 @@ T = readtable(fileID);
 Data = table2array(T);
 time = Data(:,1);
 figure(1); hold on
-for i = [8,9]
+for i = [2,9]
+    
     %figure;
     plot(time,Data(:,i),'-','Linewidth',1);
     ylim([1.7, 2.45])
