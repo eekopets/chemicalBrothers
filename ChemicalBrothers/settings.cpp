@@ -36,7 +36,10 @@ void settings::Info()
 
 void settings::Calibration()
 {
-  Serial.println("Calibration speed");
+  Serial.print("Calibration speed. Time calibration:");
+  Serial.print(CalibrationTime/1000);
+  Serial.println("sec");
+  StartMotors();
   for (int i = 0; i < Cells; i++)
   {
     current[i] = digitalRead(PinsPhotoInt[i]);
@@ -52,6 +55,7 @@ void settings::Calibration()
       }
     }
   }
+  StopMotors();
   Serial.println("stop calibration");
   //Serial.println (interState[8]);
 }
