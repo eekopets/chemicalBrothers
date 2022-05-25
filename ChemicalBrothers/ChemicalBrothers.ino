@@ -17,12 +17,17 @@ int PinMotors2[] = {48, 42, 47, 43, 40, 5, 41, 37};
 int PinsPhotoInt[] = {22, 24, 23, 25, 9, 11, 12, 13};
 int interState[] = {0, 0, 0, 0, 0, 0, 0, 0};
 int current[] = {0, 0, 0, 0, 0, 0, 0, 0};
+bool flag[] = {0, 0, 0, 0, 0, 0, 0, 0};
+int periods[] = {3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000};
+
+int MotorsSpeed[] = {18, 18, 18, 18, 18, 18, 18, 18};
 int CalibrationTime = 10000;
 ads12xx ADS;  //initialize ADS as object of the ads12xx class
 
 
 void setup()
 {
+  //double startTime = millis();
   Serial.begin(115200);
   Serial.println("ADS1256");
   Serial.print("Initializing SD card...");
@@ -53,104 +58,141 @@ void setup()
     analogWrite(PinMotors2[i], 0);
   }
 }
+void StartMotors()
+{
+  Serial.println("Start motors!");
+  for (int i = 0; i < Cells; i++)
+  {
+    analogWrite(PinMotors[i], MotorsSpeed[i]);
+  }
+}
+
+void StopMotors()
+{
+  Serial.println("Stop motors!");
+  for (int i = 0; i < Cells; i++)
+  {
+    analogWrite(PinMotors[i], 0);
+  }
+}
+void Info()
+{
+  Serial.println("'w'— starts writing to file");
+  Serial.println("'s'— stops writing to file");
+  Serial.println("'m'— start motors");
+  Serial.println("'n'— stop motors");
+  Serial.println("'c'— calibration speed");
+  Serial.println("'C'— stop calibration");
+  for (int i = 0; i < Cells; i++)
+  {
+    Serial.print("Speed motor:");
+    Serial.print(i + 1);
+    Serial.print("\t");
+    Serial.println(interState[i] / 2);
+  }
+}
+
+void Calibration()
+{
+  Serial.println("Calibration speed");
+  for (int i = 0; i < Cells; i++)
+  {
+    current[i] = digitalRead(PinsPhotoInt[i]);
+  }
+  int startT = millis();
+  while ((Serial.read() != 'C') && (millis() - startT < CalibrationTime)) {
+    for (int i = 0; i < Cells; i++)
+    {
+      if (digitalRead(PinsPhotoInt[i]) == !current[i])
+      {
+        interState[i] = interState[i] + 1;
+        current[i] = digitalRead(PinsPhotoInt[i]);
+      }
+    }
+  }
+  Serial.println("stop calibration");
+  //Serial.println (interState[8]);
+}
+
+
+void rutine()
+{
+
+  if (!SD.begin(SDpin))
+  {
+    Serial.println("No card");
+  } else {
+    myFile = SD.open("test6.txt", FILE_WRITE);
+    Serial.println("Start writing to file.");
+    double startTime = millis();
+    for (int i = 0; i < Cells; i++)
+    {
+      analogWrite(PinMotors[i], MotorsSpeed[i]);
+      current[i] = startTime;
+      flag[i] = true;
+    }
+    while (Serial.read() != 'p') {
+
+      ADS.SendCMD(SELFCAL);
+      ADS.SetRegisterValue(DRATE, B10010010);  // 500 SPS
+      double elapsedTime = millis();
+      myFile.print(elapsedTime, 2);
+      for (int i = 0; i < Cells; i++)
+      {
+        //Serial.print(current[i] - elapsedTime);
+        //Serial.print("\t");
+        if ( elapsedTime- current[i] > periods[i])
+        {
+          flag[i] = !flag[i];
+
+          current[i] = elapsedTime;
+        }
+        if (flag[i])
+          analogWrite(PinMotors[i], MotorsSpeed[i]);
+
+        else
+          analogWrite(PinMotors[i], 0);
+
+        myFile.print("\t");
+        ADS.SetRegisterValue(MUX, Bin[i]);//AIN0+AINCOM -- CH0
+        myFile.print(ADS.GetConversion(), 8);
+      }
+    }
+    myFile.print("\n");
+  }
+  Serial.println("done writing to file.");
+  myFile.close();
+}
+
 
 void loop() {
-  double startTime = millis();
 
   if (Serial.available() > 0) {
-
     char cin = Serial.read();
     switch (cin) {
       case 'w':
-
-        if (!SD.begin(SDpin))
-        {
-          Serial.println("No card");
-        } else {
-          myFile = SD.open("test5.txt", FILE_WRITE);
-          Serial.println("Start writing to file.");
-          while (Serial.read() != 's') {
-            ADS.SendCMD(SELFCAL);
-            //ADS.SetRegisterValue(DRATE, B10100001);  //1000 SPS for 1 sample
-            ADS.SetRegisterValue(DRATE, B10010010);  // 500 SPS
-            //ADS.SetRegisterValue(DRATE, B10110000);  // 2000 SPS
-            //delay(5);
-            double elapsedTime = millis() - startTime;
-            myFile.print(elapsedTime, 2);
-            for (int i = 0; i < Cells; i++)
-            {
-              myFile.print("\t");
-              ADS.SetRegisterValue(MUX, Bin[i]);//AIN0+AINCOM -- CH0
-              myFile.print(ADS.GetConversion(), 8);
-            }
-            myFile.print("\n");
-          }
-          Serial.println("done writing to file.");
-          myFile.close();
-        }
-
+        rutine();
         break;
-
       case 'm':
-        Serial.println("Start motors!");
-
-        for (int i = 0; i < Cells; i++)
-        {
-          analogWrite(PinMotors[i], 36);
-        }
-
+        StartMotors();
         break;
       case 'n':
-        Serial.println("Stop motors!");
-        for (int i = 0; i < Cells; i++)
-        {
-          analogWrite(PinMotors[i], 0);
-        }
+        StopMotors();
         break;
       case 'i':
-        Serial.println("'w'— starts writing to file");
-        Serial.println("'s'— stops writing to file");
-        Serial.println("'m'— start motors");
-        Serial.println("'n'— stop motors");
-        Serial.println("'c'— calibration speed");
-        Serial.println("'C'— stop calibration");
-         for (int i = 0; i < Cells; i++)
-        {
-          Serial.print("Speed motor:");
-          Serial.print(i+1);
-          Serial.print("\t");
-          Serial.println(interState[i]/2);
-        }
-
-        
+        Info();
         break;
       case 'c':
-        Serial.println("Calibration speed");
-        for (int i = 0; i < Cells; i++)
-        {
-          current[i] = digitalRead(PinsPhotoInt[i]);
-        }
-        int startT = millis();
-        while((Serial.read() != 'C')&&(millis()-startT<CalibrationTime)) {
-          for (int i = 0; i < Cells; i++)
-          {
-            if (digitalRead(PinsPhotoInt[i]) == !current[i])
-            {
-              interState[i] = interState[i] + 1;
-              current[i] = digitalRead(PinsPhotoInt[i]);
-            }
-          }
-        }
-        Serial.println("stop calibration");
-        //Serial.println (interState[8]);
+        Calibration();
         break;
+
       //-------------------------------------------------------------------------------------------------
       default:
 
-        //digitalWrite(4, LOW); //turn off the led when we dont measure (needs to press N two times)
         break;
         //-------------------------------------------------------------------------------------------------
     }
+
 
   }
 }
