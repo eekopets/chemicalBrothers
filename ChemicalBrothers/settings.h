@@ -23,7 +23,7 @@ class settings {
     const long int periods[Cells] = {3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000};
 
     const int MotorsSpeed[Cells] = {18, 18, 18, 18, 18, 18, 18, 18};
-    const int CalibrationTime = 10000; //10 seconds
+    const int CalibrationTime = 30000; //30 seconds
 
     ads12xx ADS;  //initialize ADS as object of the ads12xx class
     //File myFile;
