@@ -20,9 +20,9 @@ class settings {
     int interState[Cells] = {0, 0, 0, 0, 0, 0, 0, 0};
     long int current[Cells] = {0, 0, 0, 0, 0, 0, 0, 0};
     bool flag[Cells] = {0, 0, 0, 0, 0, 0, 0, 0};
-    const long int periods[Cells] = {3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000};
+    const long int periods[Cells] = {30000, 60000, 90000, 120000, 150000, 180000, 210000, 240000};
 
-    const int MotorsSpeed[Cells] = {18, 18, 18, 18, 18, 18, 18, 18};
+    const int MotorsSpeed[Cells] = {85, 85, 85, 85, 85, 85, 85, 85};
     const int CalibrationTime = 30000; //30 seconds
 
     ads12xx ADS;  //initialize ADS as object of the ads12xx class
