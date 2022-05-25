@@ -69,7 +69,7 @@ void settings::rutine()
     Serial.println("No card");
   } else {
     
-    File myFile = SD.open("test7.txt", FILE_WRITE);
+    File myFile = SD.open("test8.txt", FILE_WRITE);
     Serial.println("Start writing to file.");
     double startTime = millis();
     for (int i = 0; i < Cells; i++)
@@ -106,6 +106,7 @@ void settings::rutine()
     Serial.print("done writing to file.");
     Serial.println();
     myFile.close();
+    StopMotors();
   }
 
 }
