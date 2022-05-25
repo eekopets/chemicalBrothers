@@ -110,7 +110,6 @@ void settings::Setup()
 {
   //double startTime = millis();
   Serial.begin(115200);
-  Serial.println("ADS1256");
   Serial.print("Initializing SD card...");
   pinMode(10, OUTPUT);
 
