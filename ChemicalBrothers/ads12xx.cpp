@@ -1,6 +1,6 @@
 #include "ads12xx.h"
 
-//File myFile;
+
 volatile int DRDY_state = HIGH;
 
 // Waits until DRDY Pin is falling (see Interrupt setup). 
