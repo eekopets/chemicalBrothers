@@ -20,7 +20,7 @@ void settings::StopMotors()
 void settings::Info()
 {
   Serial.println("'w'— starts writing to file");
-  Serial.println("'s'— stops writing to file");
+  Serial.println("'p'— stops writing to file");
   Serial.println("'m'— start motors");
   Serial.println("'n'— stop motors");
   Serial.println("'c'— calibration speed");
