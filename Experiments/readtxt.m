@@ -1,11 +1,12 @@
-fileID = 'TEST8.TXT';
+close all
+fileID = '28_04.TXT';
 L = 9;
 T = readtable(fileID);
 Data = table2array(T);
 time = Data(:,1);
 repiods =[0, 50000, 100000, 150000, 200000, 250000, 300000, 350000];
 figure(1); hold on
-for i =2:2
+for i =2:9
     %figure;
     plot(time,Data(:,i),'-','Linewidth',1);
     ylim([1.7, 2.45])
